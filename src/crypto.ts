@@ -102,7 +102,9 @@ export function serializePayload(payload: EncryptedPayload): string {
 
 /**
  * Deserializes a JSON string back into an EncryptedPayload.
- * @throws If the string is not a valid EncryptedPayload
+ * @param raw - The JSON string previously produced by serializePayload
+ * @returns A validated EncryptedPayload object
+ * @throws If the string is not valid JSON or is missing required fields
  */
 export function deserializePayload(raw: string): EncryptedPayload {
   let parsed: unknown;
@@ -112,15 +114,13 @@ export function deserializePayload(raw: string): EncryptedPayload {
     throw new Error("Failed to parse encrypted payload: invalid JSON.");
   }
 
-  const p = parsed as Record<string, unknown>;
-  if (
-    typeof p.salt !== "string" ||
-    typeof p.iv !== "string" ||
-    typeof p.tag !== "string" ||
-    typeof p.data !== "string"
-  ) {
-    throw new Error("Invalid encrypted payload structure.");
+  const obj = parsed as Record<string, unknown>;
+  const requiredKeys: (keyof EncryptedPayload)[] = ["salt", "iv", "tag", "data"];
+  for (const key of requiredKeys) {
+    if (typeof obj[key] !== "string") {
+      throw new Error(`Invalid encrypted payload: missing or non-string field "${key}".`);
+    }
   }
 
-  return { salt: p.salt, iv: p.iv, tag: p.tag, data: p.data };
+  return obj as unknown as EncryptedPayload;
 }
