@@ -44,6 +44,12 @@ Sync across multiple environments at once:
 envoy sync --from production --to staging
 ```
 
+List all available environments in the vault:
+
+```bash
+envoy list
+```
+
 > **Note:** All secrets are encrypted before being sent to the remote vault. Your plaintext values never leave your machine unencrypted.
 
 ---
